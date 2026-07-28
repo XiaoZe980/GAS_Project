@@ -1,0 +1,37 @@
+# Unreal Engine 5
+Binaries/
+Intermediate/
+DerivedDataCache/
+Saved/
+
+# Generated VS solution files
+*.sln
+*.slnx
+
+# IDE
+.vs/
+.vscode/
+.vsconfig
+
+# Rider — keep shared settings, discard user-local
+.idea/.idea.*/.idea/workspace.xml
+.idea/.idea.*/.idea/projectSettingsUpdater.xml
+
+# Xcode
+*.xcworkspace
+*.xcuserdata
+
+# Content auto-generated
+Content/__ExternalActors__/
+Content/__ExternalObjects__/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Packaging
+Build/
+
+# Python
+*.pyc
+__pycache__/
