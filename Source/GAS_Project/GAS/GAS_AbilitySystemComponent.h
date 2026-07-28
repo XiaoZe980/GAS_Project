@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
+#include "GameplayEffect.h"
 #include "GAS_AbilitySystemComponent.generated.h"
 
 UCLASS(ClassGroup = "GAS", meta = (BlueprintSpawnableComponent))
