@@ -172,18 +172,39 @@ void AGAS_ProjectCharacter::DoJumpEnd()
 
 void AGAS_ProjectCharacter::OnAttackPressed()
 {
+	UE_LOG(LogGAS_Project, Warning, TEXT("⚔️ OnAttackPressed 已触发"));
+
 	if (!AbilitySystemComponent)
 	{
+		UE_LOG(LogGAS_Project, Error, TEXT("❌ AbilitySystemComponent 为空，无法激活技能"));
 		return;
 	}
 
-	// 用 Tag 匹配技能：
-	// 所有带有 Ability.Attack.Light 这个 AbilityTag 的技能都会被尝试激活
-	// ASC 会自动检查 Cost/Cooldown/激活条件，不满足则跳过
+	// 打印已授权的技能列表，方便排查
+	UE_LOG(LogGAS_Project, Warning, TEXT("📋 当前已授权技能数量: %d"), AbilitySystemComponent->GetActivatableAbilities().Num());
+	for (const FGameplayAbilitySpec& Spec : AbilitySystemComponent->GetActivatableAbilities())
+	{
+		UE_LOG(LogGAS_Project, Warning, TEXT("  → %s (Tags: %s)"),
+			*GetNameSafe(Spec.Ability),
+			*Spec.Ability->AbilityTags.ToStringSimple());
+	}
+
+	// 用 Tag 匹配技能
 	FGameplayTagContainer AttackTags;
 	AttackTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("Ability.Attack.Light")));
 
-	AbilitySystemComponent->TryActivateAbilitiesByTag(AttackTags);
+	const bool bActivated = AbilitySystemComponent->TryActivateAbilitiesByTag(AttackTags);
+
+	if (bActivated)
+	{
+		UE_LOG(LogGAS_Project, Warning, TEXT("✅ 技能激活成功"));
+	}
+	else
+	{
+		UE_LOG(LogGAS_Project, Error, TEXT("❌ 未找到匹配 Ability.Attack.Light 的技能。请检查：\n"
+			"  1. GA_Attack_Light 是否在 BP_ThirdPersonCharacter 的 DefaultAbilities 数组中\n"
+			"  2. GA_Attack_Light 的 Ability Tags 是否包含 Ability.Attack.Light"));
+	}
 }
 
 void AGAS_ProjectCharacter::OnAttackReleased()
