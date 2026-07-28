@@ -16,6 +16,7 @@
 #include "GAS/GAS_AbilitySystemComponent.h"
 #include "GAS/GAS_AttributeSet.h"
 #include "GAS/GAS_GameplayAbility.h"
+#include "GameplayTagContainer.h"
 
 AGAS_ProjectCharacter::AGAS_ProjectCharacter()
 {
@@ -109,6 +110,10 @@ void AGAS_ProjectCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AGAS_ProjectCharacter::Look);
 
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGAS_ProjectCharacter::Look);
+
+			// 攻击输入 — 按下时尝试激活技能，松开时通知 ASC
+			EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AGAS_ProjectCharacter::OnAttackPressed);
+			EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &AGAS_ProjectCharacter::OnAttackReleased);
 	}
 	else
 	{
@@ -159,4 +164,39 @@ void AGAS_ProjectCharacter::DoJumpStart()
 void AGAS_ProjectCharacter::DoJumpEnd()
 {
 	StopJumping();
+}
+
+// ------------------------------------------------------------------------
+// 攻击输入 → GAS Tag 激活
+// ------------------------------------------------------------------------
+
+void AGAS_ProjectCharacter::OnAttackPressed()
+{
+	if (!AbilitySystemComponent)
+	{
+		return;
+	}
+
+	// 用 Tag 匹配技能：
+	// 所有带有 Ability.Attack.Light 这个 AbilityTag 的技能都会被尝试激活
+	// ASC 会自动检查 Cost/Cooldown/激活条件，不满足则跳过
+	FGameplayTagContainer AttackTags;
+	AttackTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("Ability.Attack.Light")));
+
+	AbilitySystemComponent->TryActivateAbilitiesByTag(AttackTags);
+}
+
+void AGAS_ProjectCharacter::OnAttackReleased()
+{
+	if (!AbilitySystemComponent)
+	{
+		return;
+	}
+
+	// 通知 ASC 攻击输入已松开
+	// 配合"按住蓄力"类技能使用 — 松开时技能内部可以检测到并执行释放逻辑
+	FGameplayTagContainer AttackTags;
+	AttackTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("Ability.Attack.Light")));
+
+	AbilitySystemComponent->CancelAbilities(&AttackTags);
 }

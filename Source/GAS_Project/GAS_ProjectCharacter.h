@@ -61,6 +61,10 @@ class AGAS_ProjectCharacter : public ACharacter, public IAbilitySystemInterface
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* MouseLookAction;
 
+	/** 攻击输入 — 按下时尝试激活带对应 AbilityTag 的技能 */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* AttackAction;
+
 public:
 	AGAS_ProjectCharacter();
 
@@ -96,6 +100,11 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+
+	/** 按下攻击键 → 通过 GAS Tag 激活技能 */
+	void OnAttackPressed();
+	/** 松开攻击键 → 通知 ASC 释放输入（配合蓄力/按住类技能使用） */
+	void OnAttackReleased();
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Input")
