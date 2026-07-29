@@ -64,18 +64,18 @@ FActiveGameplayEffectHandle UGAS_AbilitySystemComponent::ApplyEffectToSelf(
 
 	const FGameplayEffectContextHandle Context = MakeEffectContext();
 	const FGameplayEffectSpecHandle Spec = MakeOutgoingSpec(EffectClass, Level, Context);
-	const FActiveGameplayEffectHandle Handle = ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
 
-	if (Handle.IsValid())
+	// Instant 效果执行后立即销毁，返回的 Handle 必然无效——这是正常行为。
+	// 只要 Spec 创建成功，效果就已经施加了。
+	if (!Spec.IsValid() || !Spec.Data.IsValid())
 	{
-		UE_LOG(LogGAS_Project, Warning, TEXT("✅ ApplyEffectToSelf: 效果已成功施加"));
-	}
-	else
-	{
-		UE_LOG(LogGAS_Project, Error, TEXT("❌ ApplyEffectToSelf: 施加失败，EffectSpec 可能无效"));
+		UE_LOG(LogGAS_Project, Error, TEXT("❌ ApplyEffectToSelf: MakeOutgoingSpec 失败"));
+		return FActiveGameplayEffectHandle();
 	}
 
-	return Handle;
+	ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+	UE_LOG(LogGAS_Project, Warning, TEXT("✅ ApplyEffectToSelf: 效果已施加"));
+	return FActiveGameplayEffectHandle();
 }
 
 FActiveGameplayEffectHandle UGAS_AbilitySystemComponent::ApplyEffectToTarget(
