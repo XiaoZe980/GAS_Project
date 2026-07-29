@@ -55,12 +55,26 @@ FActiveGameplayEffectHandle UGAS_AbilitySystemComponent::ApplyEffectToSelf(
 {
 	if (!IsValid(EffectClass))
 	{
+		UE_LOG(LogGAS_Project, Error, TEXT("❌ ApplyEffectToSelf: EffectClass 为空"));
 		return FActiveGameplayEffectHandle();
 	}
 
+	UE_LOG(LogGAS_Project, Warning, TEXT("💊 ApplyEffectToSelf: 正在施加 %s (Level %.0f)"), *EffectClass->GetName(), Level);
+
 	const FGameplayEffectContextHandle Context = MakeEffectContext();
 	const FGameplayEffectSpecHandle Spec = MakeOutgoingSpec(EffectClass, Level, Context);
-	return ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+	const FActiveGameplayEffectHandle Handle = ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+
+	if (Handle.IsValid())
+	{
+		UE_LOG(LogGAS_Project, Warning, TEXT("✅ ApplyEffectToSelf: 效果已成功施加"));
+	}
+	else
+	{
+		UE_LOG(LogGAS_Project, Error, TEXT("❌ ApplyEffectToSelf: 施加失败，EffectSpec 可能无效"));
+	}
+
+	return Handle;
 }
 
 FActiveGameplayEffectHandle UGAS_AbilitySystemComponent::ApplyEffectToTarget(

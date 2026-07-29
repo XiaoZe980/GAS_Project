@@ -49,6 +49,13 @@ void UGAS_AttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 {
 	Super::PostGameplayEffectExecute(Data);
 
+	// 打印每个 GE 的执行信息，方便排查配置错误
+	const FGameplayTagContainer& SourceTags = *Data.EffectSpec.CapturedSourceTags.GetAggregatedTags();
+	UE_LOG(LogGAS_Project, Warning, TEXT("📨 PostGameplayEffectExecute: 属性=%s, 值=%.1f, 来源=%s"),
+		*Data.EvaluatedData.Attribute.GetName(),
+		Data.EvaluatedData.Magnitude,
+		*SourceTags.ToStringSimple());
+
 	if (Data.EvaluatedData.Attribute == GetDamageAttribute())
 	{
 		HandleDamage(Data);
@@ -62,11 +69,18 @@ void UGAS_AttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 void UGAS_AttributeSet::HandleDamage(const FGameplayEffectModCallbackData& Data)
 {
 	const float IncomingDamage = GetDamage();
+	const float OldHealth = GetHealth();
 
 	if (IncomingDamage > 0.f)
 	{
-		const float NewHealth = FMath::Max(GetHealth() - IncomingDamage, 0.f);
+		const float NewHealth = FMath::Max(OldHealth - IncomingDamage, 0.f);
 		SetHealth(NewHealth);
+
+		UE_LOG(LogGAS_Project, Warning, TEXT("💥 HandleDamage: 受到 %.0f 点伤害, Health %.0f → %.0f"), IncomingDamage, OldHealth, NewHealth);
+	}
+	else
+	{
+		UE_LOG(LogGAS_Project, Warning, TEXT("⚠️ HandleDamage: Damage=%.0f (≤0，未扣血) — 检查 GE 的 Magnitude 是否设为正数"), IncomingDamage);
 	}
 
 	SetDamage(0.f);
