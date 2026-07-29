@@ -1,6 +1,7 @@
 // Copyright GAS_Project. All Rights Reserved.
 
 #include "GAS_AttributeSet.h"
+#include "GAS_Project.h"
 #include "Net/UnrealNetwork.h"
 #include "GameplayEffectExtension.h"
 

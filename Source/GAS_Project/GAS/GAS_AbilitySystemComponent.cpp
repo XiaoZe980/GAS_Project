@@ -1,6 +1,7 @@
 // Copyright GAS_Project. All Rights Reserved.
 
 #include "GAS_AbilitySystemComponent.h"
+#include "GAS_Project.h"
 
 UGAS_AbilitySystemComponent::UGAS_AbilitySystemComponent()
 {
